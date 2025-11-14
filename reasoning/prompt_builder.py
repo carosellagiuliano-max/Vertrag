@@ -1,5 +1,4 @@
 """Prompt construction utilities for the reasoning layer."""
-"""Prompt construction utilities for the reasoning layer."""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -16,6 +15,7 @@ class PromptContext:
     raw_filename: str
     layout: LayoutAnalysisResult | None
     schema_literal: str
+    extraction_metadata: dict | None = None
 
 
 class PromptBuilder:
@@ -46,9 +46,16 @@ class PromptBuilder:
         layout_section = (
             f"\n{context.layout.to_prompt_section()}\n" if context.layout and context.layout.blocks else ""
         )
+        metadata_section = ""
+        if context.extraction_metadata:
+            flattened = ", ".join(
+                f"{key}={value}" for key, value in context.extraction_metadata.items() if value not in (None, "")
+            )
+            if flattened:
+                metadata_section = f"\nExtraction metadata: {flattened}."
         return (
-            f"Document type: customer order form. Active customer profile: {profile.id}."\
-            f"\n{intro}\n{layout_section}\nLiteral JSON schema (as provided):\n{schema_literal}\n\n"
+            f"Document type: customer order form. Active customer profile: {profile.id}."
+            f"\n{intro}{metadata_section}\n{layout_section}\nLiteral JSON schema (as provided):\n{schema_literal}\n\n"
             f"Raw text extracted from the PDF (triple-backtick fenced).\n```{context.raw_text}```\n\n"
             f"Instructions:\n{instructions}\n{example_section}Raw filename: {context.raw_filename}"
         )

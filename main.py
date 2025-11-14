@@ -13,6 +13,8 @@ from fastapi.responses import JSONResponse
 from starlette.requests import Request
 
 from config import get_settings
+from extract.base import ChainedTextExtractor
+from extract.deepseek_ocr import DeepSeekOcrEngine
 from extract.order_extractor import OrderExtractor
 from extract.pdf_text_extractor import PdfTextExtractor
 from models.order import OrderExtractionResult
@@ -61,7 +63,17 @@ def _build_pipeline() -> OrderIngestionPipeline:
     settings = get_settings()
     if not settings.openai_api_key:
         LOGGER.warning("OPENAI_API_KEY is not set. Order extraction will fail without a key.")
-    text_extractor = PdfTextExtractor()
+    pdf_text_engine = PdfTextExtractor()
+    engines = [pdf_text_engine]
+    if settings.deepseek_ocr_endpoint and (settings.deepseek_ocr_api_key or settings.deepseek_api_key):
+        engines.append(DeepSeekOcrEngine())
+    else:
+        LOGGER.info("DeepSeek OCR disabled – missing endpoint or API key")
+    text_extractor = ChainedTextExtractor(
+        engines,
+        min_characters=settings.extractor_min_characters,
+        min_alpha_ratio=settings.extractor_min_alpha_ratio,
+    )
     reasoning_engine = OrderExtractor()
     config = PipelineConfig(text_extractor=text_extractor, reasoning_engine=reasoning_engine)
     return OrderIngestionPipeline(config)

@@ -7,7 +7,13 @@ from pathlib import Path
 import pdfplumber
 from pypdf import PdfReader
 
-from extract.base import ChainedTextExtractor, DocumentExtractionContext, ExtractionArtifacts, TextExtractionEngine
+from extract.base import (
+    ChainedTextExtractor,
+    DocumentExtractionContext,
+    PageExtraction,
+    TextExtractionResult,
+    TextExtractionEngine,
+)
 
 
 class _PdfplumberEngine(TextExtractionEngine):
@@ -16,20 +22,32 @@ class _PdfplumberEngine(TextExtractionEngine):
 
     async def extract(
         self, source: Path, context: DocumentExtractionContext
-    ) -> ExtractionArtifacts:
+    ) -> TextExtractionResult:
         loop = asyncio.get_running_loop()
-        text = await loop.run_in_executor(None, _extract_with_pdfplumber, source)
-        return ExtractionArtifacts(text=text, metadata={"engine_name": self.name})
+        pages = await loop.run_in_executor(None, _extract_with_pdfplumber, source)
+        page_models = [
+            PageExtraction(page_number=idx + 1, text=page_text or "")
+            for idx, page_text in enumerate(pages)
+        ]
+        combined = "\n".join(page.text for page in page_models)
+        metadata = {"engine_name": self.name, "page_count": len(page_models)}
+        return TextExtractionResult(combined_text=combined, pages=page_models, metadata=metadata)
 
 
 class _PyPdfEngine(TextExtractionEngine):
     name = "pypdf"
     priority = 2
 
-    async def extract(self, source: Path, context: DocumentExtractionContext) -> ExtractionArtifacts:
+    async def extract(self, source: Path, context: DocumentExtractionContext) -> TextExtractionResult:
         loop = asyncio.get_running_loop()
-        text = await loop.run_in_executor(None, _extract_with_pypdf, source)
-        return ExtractionArtifacts(text=text, metadata={"engine_name": self.name})
+        pages = await loop.run_in_executor(None, _extract_with_pypdf, source)
+        page_models = [
+            PageExtraction(page_number=idx + 1, text=page_text or "")
+            for idx, page_text in enumerate(pages)
+        ]
+        combined = "\n".join(page.text for page in page_models)
+        metadata = {"engine_name": self.name, "page_count": len(page_models)}
+        return TextExtractionResult(combined_text=combined, pages=page_models, metadata=metadata)
 
 
 class PdfTextExtractor(ChainedTextExtractor):
@@ -48,13 +66,13 @@ async def extract_text(path: Path, context: DocumentExtractionContext | None = N
     return artifacts.text
 
 
-def _extract_with_pdfplumber(path: Path) -> str:
+def _extract_with_pdfplumber(path: Path) -> list[str]:
     with pdfplumber.open(path) as pdf:
         text_chunks = [page.extract_text() or "" for page in pdf.pages]
-    return "\n".join(text_chunks)
+    return text_chunks
 
 
-def _extract_with_pypdf(path: Path) -> str:
+def _extract_with_pypdf(path: Path) -> list[str]:
     reader = PdfReader(str(path))
     text_chunks = [page.extract_text() or "" for page in reader.pages]
-    return "\n".join(text_chunks)
+    return text_chunks

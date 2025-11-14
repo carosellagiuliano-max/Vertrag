@@ -1,7 +1,5 @@
 import pytest
 
-import pytest
-
 from extract.pdf_text_extractor import extract_text
 
 

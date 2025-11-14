@@ -42,9 +42,12 @@ class OrderIngestionPipeline:
         form_id: Optional[str] = None,
     ) -> OrderExtractionResult:
         profile = self.profile_repo.load(customer_profile_id)
+        hints = profile.metadata.get("extraction_hints", {}) if isinstance(profile.metadata, dict) else {}
         context = DocumentExtractionContext(
             raw_filename=raw_filename,
             customer_profile_id=profile.id,
+            hints=hints,
+            force_ocr=bool(hints.get("force_ocr")),
         )
         extraction = await self.config.text_extractor.extract(source_path, context)
         layout_result = await self.layout_analyzer.analyze(source_path, extraction, context)
@@ -58,6 +61,7 @@ class OrderIngestionPipeline:
             layout=layout_result,
             schema_literal=schema_literal,
             json_schema=json_schema,
+            extraction_metadata=extraction.metadata,
         )
         return await self.config.reasoning_engine.extract_order_with_prompt(
             request=prompt_context,

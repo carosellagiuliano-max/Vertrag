@@ -32,6 +32,7 @@ class ReasoningRequest:
     json_schema: Dict[str, Any]
     form_id: Optional[str] = None
     layout: Optional[LayoutAnalysisResult] = None
+    extraction_metadata: Optional[Dict[str, Any]] = None
 
 
 class OrderExtractor:
@@ -87,6 +88,7 @@ class OrderExtractor:
             raw_filename=request.raw_filename,
             layout=request.layout,
             schema_literal=request.schema_literal,
+            extraction_metadata=request.extraction_metadata,
         )
         system_message, user_message = builder.build_messages(prompt_context)
         payload = await asyncio.to_thread(
