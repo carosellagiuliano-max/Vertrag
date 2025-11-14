@@ -9,7 +9,6 @@ from decimal import Decimal
 from typing import Any, Dict, List, Optional
 
 from openai import OpenAI
-from openai.types import Response
 
 from config import get_settings
 from layout.base import LayoutAnalysisResult
@@ -137,7 +136,7 @@ class OrderExtractor:
 
     # ------------------------------------------------------------------
     @staticmethod
-    def _parse_response_json(response: Response) -> Dict[str, Any]:
+    def _parse_response_json(response: Any) -> Dict[str, Any]:
         chunks: List[str] = []
         for item in response.output:
             for content in item.content:
@@ -160,7 +159,7 @@ class OrderExtractor:
                     line[field] = str(Decimal(str(line[field])))
 
     @staticmethod
-    def _compute_confidence(response: Response) -> Optional[float]:
+    def _compute_confidence(response: Any) -> Optional[float]:
         try:
             response_dict = response.model_dump()
         except AttributeError:
