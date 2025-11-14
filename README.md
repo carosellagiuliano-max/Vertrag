@@ -138,3 +138,17 @@ Build and run:
 docker build -t order-extraction .
 docker run -p 8000:8000 -e OPENAI_API_KEY=sk-... order-extraction
 ```
+
+## Deployment Guide
+
+For production rollouts—including Docker Compose and Kubernetes targets—follow the detailed runbook in
+[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md). It covers:
+
+- supported deployment topologies (single VM, Compose, Kubernetes)
+- environment variable management and secret handling
+- filesystem/temp storage requirements for OCR rendering
+- scaling, observability, and security best practices
+- rollout/disaster-recovery procedures and future enhancements
+
+Use this guide to ensure the OCR pipeline, LLM credentials, and monitoring hooks are configured consistently across
+environments.
