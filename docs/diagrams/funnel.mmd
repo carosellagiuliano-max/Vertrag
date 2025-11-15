@@ -1,0 +1,20 @@
+graph TD
+    A[Landingpage<br/>Sprachwahl] --> B[Home-Content<br/>USPs & Testimonials]
+    B --> C[Programme überblicken]
+    C --> D[CTA Klick<br/>Formular / Termin]
+    D --> E[Qualifizierungs-Call]
+    E --> F{Angebotswahl}
+    F -->|1:1| G[Zahlung Online<br/>Stripe]
+    F -->|Gruppe| H[Gruppenabo Aktivierung]
+    F -->|App| I[Premium-App-Freischaltung]
+    G --> J[Onboarding Dashboard]
+    H --> J
+    I --> J
+    J --> K[Community & Challenges]
+    K --> L[Loyalty & Referral Programm]
+    classDef frontend fill:#CFE8FF,stroke:#1C4F82,color:#1C4F82;
+    classDef backend fill:#9BD8A4,stroke:#1E5C2E,color:#0F3B17;
+    classDef integration fill:#B5B5B5,stroke:#4D4D4D,color:#1D1D1D;
+    class A,B,C,D,E,F,G,H,I,J,K,L frontend;
+    class G,H,I integration;
+    class J,K,L backend;

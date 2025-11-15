@@ -1,0 +1,42 @@
+graph TD
+    Home[Home<br/>Hero & CTA] --> Programme[Coaching-Programme]
+    Home --> About[Über mich]
+    Home --> Ergebnisse[Ergebnisse]
+    Home --> Blog[Blog / Knowledge Hub]
+    Home --> Kontakt[Kontakt / Buchung]
+    Home --> Newsletter[Newsletter / Freebie]
+    Home --> Community[Community / Gamification]
+    Home --> Dashboard[Dashboard / Mobile App]
+
+    Programme --> P1[1:1 Coaching]
+    Programme --> P2[Gruppenprogramm]
+    Programme --> P3[App-Coaching]
+    Programme --> Addons[Add-ons<br/>Retreats & Corporate]
+
+    Blog --> Training[Kategorie Training]
+    Blog --> Ernaehrung[Kategorie Ernährung]
+    Blog --> Motivation[Kategorie Motivation]
+    Blog --> International[Kategorie International]
+
+    Ergebnisse --> Gallery[Vorher-Nachher Galerie]
+    Ergebnisse --> Video[Testimonial Videos]
+
+    Kontakt --> Formular[Formular mehrsprachig]
+    Kontakt --> Calendly[Terminbuchung (Calendly/TidyCal)]
+    Kontakt --> Support[Live-Chat / WhatsApp]
+
+    Community --> Forum[Forum & Gruppenchat]
+    Community --> Challenges[Challenges & Leaderboard]
+
+    Dashboard --> Plaene[Trainings- & Ernährungspläne]
+    Dashboard --> Fortschritt[Fortschrittsdiagramme]
+    Dashboard --> Notifications[Push-Notifications]
+
+    classDef frontend fill:#CFE8FF,stroke:#1C4F82,color:#1C4F82;
+    classDef backend fill:#9BD8A4,stroke:#1E5C2E,color:#0F3B17;
+    classDef integration fill:#B5B5B5,stroke:#4D4D4D,color:#1D1D1D;
+    classDef data fill:#F7D879,stroke:#A9741E,color:#4D2E00;
+
+    class Home,Programme,About,Ergebnisse,Blog,Kontakt,Newsletter,Community,Dashboard frontend;
+    class Calendly,Support integration;
+    class Plaene,Fortschritt data;

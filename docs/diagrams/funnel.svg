@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="520" viewBox="0 0 920 520" role="img" aria-labelledby="title desc">
+  <title id="title">TTOGFIT.COM Marketing Funnel</title>
+  <desc id="desc">Visualisierung des Benutzerflusses vom ersten Kontakt über Buchung bis zu Loyalitätsmassnahmen.</desc>
+  <style>
+    .node { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 16px; text-anchor: middle; }
+    .frontend { fill: #CFE8FF; stroke: #1C4F82; }
+    .backend { fill: #9BD8A4; stroke: #1E5C2E; }
+    .integration { fill: #B5B5B5; stroke: #4D4D4D; }
+    .arrow { fill: none; stroke: #4D4D4D; stroke-width: 2.5; marker-end: url(#arrowhead); }
+    .label { font-size: 14px; }
+  </style>
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="8" refY="3.5" orient="auto" fill="#4D4D4D">
+      <polygon points="0 0, 10 3.5, 0 7" />
+    </marker>
+  </defs>
+  <rect x="50" y="40" width="180" height="70" rx="12" class="frontend" />
+  <text x="140" y="75" class="node">Landingpage</text>
+  <text x="140" y="95" class="node label">Sprachwahl</text>
+
+  <rect x="260" y="40" width="200" height="70" rx="12" class="frontend" />
+  <text x="360" y="75" class="node">Home-Content</text>
+  <text x="360" y="95" class="node label">USPs &amp; Testimonials</text>
+
+  <rect x="500" y="40" width="200" height="70" rx="12" class="frontend" />
+  <text x="600" y="75" class="node">Programme</text>
+  <text x="600" y="95" class="node label">Überblick &amp; CTAs</text>
+
+  <rect x="740" y="40" width="150" height="70" rx="12" class="frontend" />
+  <text x="815" y="75" class="node">CTA Klick</text>
+  <text x="815" y="95" class="node label">Formular / Termin</text>
+
+  <line x1="230" y1="75" x2="260" y2="75" class="arrow" />
+  <line x1="460" y1="75" x2="500" y2="75" class="arrow" />
+  <line x1="700" y1="75" x2="740" y2="75" class="arrow" />
+
+  <rect x="150" y="150" width="200" height="70" rx="12" class="frontend" />
+  <text x="250" y="185" class="node">Qualifizierungs-Call</text>
+
+  <rect x="400" y="140" width="220" height="90" rx="12" class="frontend" />
+  <text x="510" y="180" class="node">Angebotswahl</text>
+
+  <line x1="815" y1="110" x2="510" y2="140" class="arrow" />
+  <line x1="260" y1="185" x2="400" y2="185" class="arrow" />
+
+  <rect x="90" y="260" width="180" height="70" rx="12" class="integration" />
+  <text x="180" y="295" class="node">Zahlung Online</text>
+  <text x="180" y="315" class="node label">Stripe</text>
+
+  <rect x="310" y="260" width="200" height="70" rx="12" class="integration" />
+  <text x="410" y="295" class="node">Gruppenabo</text>
+  <text x="410" y="315" class="node label">Aktivierung</text>
+
+  <rect x="550" y="260" width="220" height="70" rx="12" class="integration" />
+  <text x="660" y="295" class="node">App-Freischaltung</text>
+  <text x="660" y="315" class="node label">Premium</text>
+
+  <line x1="510" y1="230" x2="180" y2="260" class="arrow" />
+  <line x1="510" y1="230" x2="410" y2="260" class="arrow" />
+  <line x1="510" y1="230" x2="660" y2="260" class="arrow" />
+
+  <rect x="200" y="370" width="220" height="70" rx="12" class="backend" />
+  <text x="310" y="405" class="node">Onboarding Dashboard</text>
+  <text x="310" y="425" class="node label">Pläne &amp; Check-ins</text>
+
+  <rect x="470" y="370" width="220" height="70" rx="12" class="backend" />
+  <text x="580" y="405" class="node">Community &amp; Challenges</text>
+
+  <rect x="720" y="370" width="170" height="70" rx="12" class="backend" />
+  <text x="805" y="405" class="node">Loyalty &amp; Referrals</text>
+
+  <line x1="180" y1="330" x2="310" y2="370" class="arrow" />
+  <line x1="410" y1="330" x2="470" y2="370" class="arrow" />
+  <line x1="660" y1="330" x2="720" y2="370" class="arrow" />
+  <line x1="420" y1="405" x2="470" y2="405" class="arrow" />
+  <line x1="690" y1="405" x2="720" y2="405" class="arrow" />
+</svg>
