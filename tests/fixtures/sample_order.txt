@@ -1,0 +1,4 @@
+Customer: Example Machines Ltd.
+PO: PO-98765
+Qty: 15 widgets at 12.00 each
+Ship to: 42 Galaxy Way
