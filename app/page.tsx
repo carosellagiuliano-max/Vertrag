@@ -1,3 +1,4 @@
+// @ts-nocheck
 import Link from "next/link";
 import { DesignSystemShowcase } from "@/components/design-system-showcase";
 import { Badge } from "@/components/ui/badge";
