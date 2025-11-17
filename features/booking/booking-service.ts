@@ -58,10 +58,25 @@ export async function createBooking(input: BookingInput): Promise<BookingResult>
   const { data: existingUsers } = await client.auth.admin.listUsers({ email: input.email, perPage: 1 });
   let userId = existingUsers?.users?.[0]?.id;
 
-  if (!userId) {
+  if (userId) {
+    if (!input.password) {
+      throw new Error("Passwort erforderlich, um bestehendes Konto zu nutzen");
+    }
+    const { data: signIn, error } = await client.auth.signInWithPassword({
+      email: input.email,
+      password: input.password,
+    });
+    if (error || !signIn?.user) {
+      throw new Error("E-Mail oder Passwort falsch");
+    }
+    userId = signIn.user.id;
+  } else {
+    if (!input.password) {
+      throw new Error("Passwort erforderlich, um neues Konto anzulegen");
+    }
     const created = await client.auth.admin.createUser({
       email: input.email,
-      password: input.password ?? crypto.randomUUID(),
+      password: input.password,
       email_confirm: true,
       user_metadata: { first_name: input.firstName, last_name: input.lastName },
     });

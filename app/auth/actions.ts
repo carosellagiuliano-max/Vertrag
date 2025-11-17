@@ -61,7 +61,7 @@ export async function loginAction(_: AuthState | undefined, formData: FormData):
     return { ok: false, message: parsed.error.errors[0]?.message ?? "Ungültige Eingabe" };
   }
 
-  const { email } = parsed.data;
+  const { email, password } = parsed.data;
 
   if (!hasSupabaseConfig) {
     cookies().set("demo-user-email", email, { httpOnly: true });
@@ -71,10 +71,9 @@ export async function loginAction(_: AuthState | undefined, formData: FormData):
   const client = getServiceRoleClient();
   if (!client) return { ok: false, message: "Supabase fehlt" };
 
-  const userLookup = await client.auth.admin.listUsers({ email, perPage: 1 });
-  const userId = userLookup.data?.users?.[0]?.id;
-  if (!userId) {
-    return { ok: false, message: "Kein Konto gefunden" };
+  const { error } = await client.auth.signInWithPassword({ email, password });
+  if (error) {
+    return { ok: false, message: "E-Mail oder Passwort falsch" };
   }
 
   cookies().set("demo-user-email", email, { httpOnly: true });
