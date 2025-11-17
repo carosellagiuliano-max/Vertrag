@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="720" viewBox="0 0 1100 720" role="img" aria-labelledby="title desc">
+  <title id="title">Informationsarchitektur TTOGFIT.COM</title>
+  <desc id="desc">Darstellung der Sitemap und der inhaltlichen Beziehungen der TTOGFIT.COM Plattform.</desc>
+  <style>
+    .node { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 16px; text-anchor: middle; }
+    .frontend { fill: #CFE8FF; stroke: #1C4F82; }
+    .integration { fill: #B5B5B5; stroke: #4D4D4D; }
+    .data { fill: #F7D879; stroke: #A9741E; }
+    .backend { fill: #9BD8A4; stroke: #1E5C2E; }
+    .arrow { fill: none; stroke: #4D4D4D; stroke-width: 2.4; marker-end: url(#arrowhead); }
+    .label { font-size: 13px; }
+  </style>
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="8" refY="3.5" orient="auto" fill="#4D4D4D">
+      <polygon points="0 0, 10 3.5, 0 7" />
+    </marker>
+  </defs>
+
+  <rect x="450" y="40" width="200" height="80" rx="14" class="frontend" />
+  <text x="550" y="78" class="node">Home</text>
+  <text x="550" y="100" class="node label">Hero &amp; CTA</text>
+
+  <rect x="150" y="160" width="180" height="70" rx="12" class="frontend" />
+  <text x="240" y="195" class="node">Über mich</text>
+
+  <rect x="370" y="160" width="200" height="70" rx="12" class="frontend" />
+  <text x="470" y="195" class="node">Coaching-Programme</text>
+
+  <rect x="620" y="160" width="180" height="70" rx="12" class="frontend" />
+  <text x="710" y="195" class="node">Ergebnisse</text>
+
+  <rect x="840" y="160" width="180" height="70" rx="12" class="frontend" />
+  <text x="930" y="195" class="node">Blog</text>
+
+  <rect x="40" y="160" width="90" height="70" rx="12" class="frontend" />
+  <text x="85" y="195" class="node">Newsletter</text>
+
+  <rect x="40" y="280" width="180" height="70" rx="12" class="frontend" />
+  <text x="130" y="315" class="node">Community</text>
+
+  <rect x="260" y="280" width="190" height="70" rx="12" class="frontend" />
+  <text x="355" y="315" class="node">Kontakt / Buchung</text>
+
+  <rect x="490" y="280" width="190" height="70" rx="12" class="frontend" />
+  <text x="585" y="315" class="node">Dashboard / App</text>
+
+  <line x1="550" y1="120" x2="85" y2="160" class="arrow" />
+  <line x1="550" y1="120" x2="240" y2="160" class="arrow" />
+  <line x1="550" y1="120" x2="470" y2="160" class="arrow" />
+  <line x1="550" y1="120" x2="710" y2="160" class="arrow" />
+  <line x1="550" y1="120" x2="930" y2="160" class="arrow" />
+  <line x1="550" y1="120" x2="130" y2="280" class="arrow" />
+  <line x1="550" y1="120" x2="355" y2="280" class="arrow" />
+  <line x1="550" y1="120" x2="585" y2="280" class="arrow" />
+
+  <rect x="330" y="380" width="150" height="60" rx="10" class="frontend" />
+  <text x="405" y="415" class="node">1:1 Coaching</text>
+
+  <rect x="500" y="380" width="160" height="60" rx="10" class="frontend" />
+  <text x="580" y="415" class="node">Gruppenprogramm</text>
+
+  <rect x="680" y="380" width="160" height="60" rx="10" class="frontend" />
+  <text x="760" y="415" class="node">App-Coaching</text>
+
+  <rect x="420" y="460" width="200" height="60" rx="10" class="frontend" />
+  <text x="520" y="495" class="node">Add-ons &amp; Corporate</text>
+
+  <line x1="470" y1="230" x2="405" y2="380" class="arrow" />
+  <line x1="470" y1="230" x2="580" y2="380" class="arrow" />
+  <line x1="470" y1="230" x2="760" y2="380" class="arrow" />
+  <line x1="470" y1="230" x2="520" y2="460" class="arrow" />
+
+  <rect x="780" y="260" width="170" height="60" rx="10" class="frontend" />
+  <text x="865" y="295" class="node">Vorher-Nachher Galerie</text>
+
+  <rect x="780" y="340" width="170" height="60" rx="10" class="frontend" />
+  <text x="865" y="375" class="node">Video-Testimonials</text>
+
+  <line x1="710" y1="230" x2="865" y2="260" class="arrow" />
+  <line x1="710" y1="230" x2="865" y2="340" class="arrow" />
+
+  <rect x="930" y="260" width="140" height="55" rx="10" class="frontend" />
+  <text x="1000" y="290" class="node">Training</text>
+
+  <rect x="930" y="325" width="140" height="55" rx="10" class="frontend" />
+  <text x="1000" y="355" class="node">Ernährung</text>
+
+  <rect x="930" y="390" width="140" height="55" rx="10" class="frontend" />
+  <text x="1000" y="420" class="node">Motivation</text>
+
+  <rect x="930" y="455" width="140" height="55" rx="10" class="frontend" />
+  <text x="1000" y="485" class="node">International</text>
+
+  <line x1="930" y1="230" x2="1000" y2="260" class="arrow" />
+  <line x1="930" y1="230" x2="1000" y2="325" class="arrow" />
+  <line x1="930" y1="230" x2="1000" y2="390" class="arrow" />
+  <line x1="930" y1="230" x2="1000" y2="455" class="arrow" />
+
+  <rect x="40" y="380" width="150" height="60" rx="10" class="frontend" />
+  <text x="115" y="410" class="node">Forum &amp; Gruppenchat</text>
+  <text x="115" y="430" class="node label">Community</text>
+
+  <rect x="210" y="380" width="150" height="60" rx="10" class="frontend" />
+  <text x="285" y="410" class="node">Challenges</text>
+  <text x="285" y="430" class="node label">Leaderboards</text>
+
+  <line x1="130" y1="350" x2="115" y2="380" class="arrow" />
+  <line x1="130" y1="350" x2="285" y2="380" class="arrow" />
+
+  <rect x="260" y="460" width="150" height="60" rx="10" class="frontend" />
+  <text x="335" y="495" class="node">Formular</text>
+  <text x="335" y="515" class="node label">Mehrsprachig</text>
+
+  <rect x="430" y="460" width="170" height="60" rx="10" class="integration" />
+  <text x="515" y="495" class="node">Calendly / TidyCal</text>
+
+  <rect x="610" y="460" width="150" height="60" rx="10" class="integration" />
+  <text x="685" y="495" class="node">Live-Chat</text>
+  <text x="685" y="515" class="node label">WhatsApp</text>
+
+  <line x1="355" y1="350" x2="335" y2="460" class="arrow" />
+  <line x1="355" y1="350" x2="515" y2="460" class="arrow" />
+  <line x1="355" y1="350" x2="685" y2="460" class="arrow" />
+
+  <rect x="520" y="560" width="170" height="60" rx="10" class="backend" />
+  <text x="605" y="595" class="node">Fortschrittsdiagramme</text>
+
+  <rect x="720" y="560" width="170" height="60" rx="10" class="data" />
+  <text x="805" y="595" class="node">Trainings- &amp; Ernährungspläne</text>
+
+  <rect x="320" y="560" width="170" height="60" rx="10" class="frontend" />
+  <text x="405" y="595" class="node">Push-Notifications</text>
+
+  <line x1="585" y1="350" x2="605" y2="560" class="arrow" />
+  <line x1="585" y1="350" x2="805" y2="560" class="arrow" />
+  <line x1="585" y1="350" x2="405" y2="560" class="arrow" />
+</svg>
