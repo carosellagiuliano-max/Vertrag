@@ -342,7 +342,7 @@ Portals
 
 3. Customer portal (Kundenportal)  
    - Example routes under /portal  
-     - "/portal" - dashboard  
+     - "/portal" dashboard  
      - "/portal/termine"  
      - "/portal/termine/[id]"  
      - "/portal/bestellungen"  
@@ -376,7 +376,7 @@ Portals
      - Preferred staff and preferred services  
      - Notification preferences per channel and type  
      - Marketing opt in and opt out  
-     - Hair notes like color formula should be visible only as design allows and must respect privacy  
+     - Hair notes like color formula visible only when UX and privacy allow  
 
    - Loyalty and vouchers  
      - View loyalty balance and history  
@@ -384,7 +384,7 @@ Portals
      - View and redeem vouchers where rules allow  
 
    - Privacy and account  
-     - Download data export request  
+     - Request data export  
      - Request account deletion or close account  
      - View consent history  
 
@@ -450,6 +450,79 @@ Portals
 - Today view with all appointments and key details  
 - Simple notes feature per customer visit  
 - Optionally staff mobile friendly view later  
+
+====================================================
+7a. AUTHENTICATION, LOGIN FLOWS AND ROUTING
+====================================================
+
+Global auth model
+
+- Use Supabase Auth email plus password  
+- Single user account can have multiple roles via user_roles  
+- Session management handled by Supabase and surfaced in Next middleware  
+
+Frontend requirements for auth
+
+- Public entry points  
+  - "/login" combined login for customers and staff  
+  - "/register" for customer sign up  
+  - Optional "/admin/login" route that focuses staff and admin  
+
+- Login screen  
+  - Email and password fields with inline validation  
+  - Show friendly errors for wrong credentials  
+  - Forgot password link  
+  - Remember me option that maps to session length where supported  
+
+- Registration screen  
+  - Minimal required fields  
+    - first name  
+    - last name  
+    - email  
+    - password  
+    - optional phone number  
+  - Accept terms and privacy checkbox with links  
+  - Show what happens next, for example confirmation mail  
+
+- Email verification flow  
+  - Screen to show that an email was sent  
+  - Screen that handles magic link result success and error  
+
+- Forgot password flow  
+  - Screen to request reset by email  
+  - Screen to set new password after Supabase magic link  
+
+- Logout  
+  - Clear button in customer portal and admin header  
+  - Confirmation only when user has unsaved work  
+
+Backend requirements for auth
+
+- Use Supabase Auth functions for sign up, sign in and sign out  
+- After sign up  
+  - create profile row linked to auth user id  
+  - assign default role customer  
+  - attach salon_id of default salon  
+
+- After login  
+  - fetch profile and roles  
+  - decide redirect target  
+    - admin or staff goes to "/admin"  
+    - customer goes to "/portal"  
+    - if multiple roles exist, show simple role choice screen  
+
+- Middleware  
+  - Protect "/portal" routes for authenticated customers only  
+  - Protect "/admin" routes for staff, manager, owner and system admin  
+  - Guests can access only public pages and booking flow until checkout  
+
+Routing rules
+
+- On unauthorized access to protected route  
+  - redirect to login with redirect_to param  
+- On successful login  
+  - if redirect_to present and allowed, go there  
+  - otherwise use default dashboard per role  
 
 ====================================================
 8. DOMAIN LOGIC - BOOKING ENGINE
@@ -801,7 +874,287 @@ Docs and commits ritual
 - Data residency EU or CH  
 
 ====================================================
-17. EXAMPLE RESPONSE TEMPLATE
+17. FRONTEND FEATURE MAP BY AREA
+====================================================
+
+Shared frontend requirements
+
+- App shell  
+  - Top navigation and footer on public pages  
+  - Side navigation for admin  
+  - Simple tab or card navigation in customer portal  
+  - Global toast system for feedback  
+  - Global loading indicator for route transitions  
+
+- Form framework  
+  - Reusable form component with label, error text and help text  
+  - Inline validation based on Zod schemas  
+  - Disabled state while submitting  
+
+Public marketing site frontend
+
+- Home page "/"  
+  - Hero section with clear call to action for booking  
+  - Highlights of key services  
+  - Link to gallery and about page  
+
+- Services page "/leistungen"  
+  - List of service categories  
+  - Service cards with name, duration, price from DB  
+  - Call to action button that pre selects service and opens booking  
+
+- About and team pages "/ueber-uns" and "/team"  
+  - Content blocks editable from admin later  
+  - Team grid showing staff photos, roles and specialties  
+
+- Contact page "/kontakt"  
+  - Contact form with name, email, message  
+  - Map section or at least address and directions  
+  - Static info for phone and opening hours  
+
+- Gallery "/galerie"  
+  - Grid of images from Supabase Storage  
+  - Lightbox view on click  
+
+Booking frontend
+
+- Multi step booking wizard reachable from "/termin-buchen" and service cards  
+  - Step 1 choose service  
+  - Step 2 choose staff or no preference  
+  - Step 3 choose date and time from available slots  
+  - Step 4 customer details and confirmation  
+
+- Components  
+  - Service picker with categories  
+  - Staff picker with photos and tags  
+  - Date picker and slot grid  
+  - Summary card with price, duration, location and cancellation rules  
+
+- States handled  
+  - Loading available slots  
+  - No slot available hint with alternatives  
+  - Validation errors for missing choices  
+
+Customer portal frontend
+
+- "/portal" dashboard  
+  - Overview cards for  
+    - next appointment  
+    - loyalty status  
+    - latest order  
+
+- "/portal/termine"  
+  - Upcoming and past appointments in separate tabs  
+  - Filters by status  
+  - Action buttons to view details, cancel or reschedule  
+
+- "/portal/termine/[id]"  
+  - Details of appointment  
+  - Show services, staff, notes, total price  
+  - Buttons for add to calendar and manage appointment  
+
+- "/portal/bestellungen" and "/portal/bestellungen/[id]"  
+  - List view with order number, date, status, total  
+  - Detail view with items, shipping info, invoices  
+
+- "/portal/profil"  
+  - Form to edit name, phone, address  
+  - Preferred staff selector  
+  - Preferred services list  
+
+- "/portal/einstellungen"  
+  - Notification preferences toggles for email types  
+  - Marketing opt in switch  
+  - Language choice if needed  
+
+- "/portal/loyalty" and "/portal/gutscheine"  
+  - Loyalty progress visual  
+  - List of vouchers with status and expiry  
+
+- "/portal/datenschutz"  
+  - Static content from admin editable page  
+
+Admin portal frontend
+
+- Admin shell "/admin"  
+  - Side navigation with all areas  
+  - Top bar with salon switcher for future multi salon  
+  - User menu with logout  
+
+- Dashboard  
+  - Cards with key metrics  
+  - Small charts for bookings and revenue over time  
+
+- Calendar  
+  - Week and day view  
+  - Filters and date picker  
+  - Modal to view and edit appointment  
+
+- Tables for customers, staff, services, products and orders  
+  - Shared table component with  
+    - column definitions  
+    - sorting  
+    - filtering  
+    - pagination  
+    - bulk action bar  
+
+- Forms  
+  - Staff edit form with working hours configuration  
+  - Service edit form with duration and pricing  
+  - Product edit form with stock levels  
+
+- Settings pages  
+  - Opening hours editor using time pickers  
+  - Cancellation rules editor  
+  - Theme settings basic inputs for colors and logo upload  
+
+Auth and login frontend details
+
+- Login form  
+  - Email and password fields  
+  - Submit button with loading state  
+  - Error banner on failure  
+
+- Register form  
+  - Same pattern with extra fields  
+  - Success screen that tells user to check email  
+
+- Forgot password form  
+  - Email input, success message  
+
+- Simple role switcher popup if user has both admin and customer role  
+
+====================================================
+18. BACKEND FEATURE MAP, SERVER ACTIONS AND EDGE FUNCTIONS
+====================================================
+
+General backend principles
+
+- Use Server Actions in Next.js for simple mutations from forms  
+- Use route handlers under app/api for more complex flows or when called from client side  
+- Use Supabase Edge Functions for  
+  - webhook handlers  
+  - long running tasks  
+  - actions that need service role  
+
+Auth backend
+
+- Use Supabase Auth for  
+  - sign up  
+  - sign in  
+  - sign out  
+  - password reset  
+
+- On sign up  
+  - Server Action or route handler that  
+    - creates profile in profiles table  
+    - assigns default customer role in user_roles  
+
+- On sign in  
+  - Read profile and roles  
+  - Decide redirect target  
+
+- Middleware to check role for  
+  - customer portal  
+  - admin portal  
+
+Booking backend
+
+Server Actions and endpoints such as
+
+- fetchServicesForBooking  
+  - Input salon_id  
+  - Output list of services and durations  
+
+- fetchStaffAvailability  
+  - Input staff_id, date range, selected services  
+  - Output time slots  
+
+- fetchAvailableSlots  
+  - Input salon_id, selected services, preferred staff, date range  
+  - Output slot list while respecting opening_hours, staff_schedules, staff_time_off and existing appointments  
+
+- createAppointment  
+  - Input customer id or guest data, selected slot, selected services  
+  - Validate rules and insert appointment  
+  - Return appointment id and status  
+
+- rescheduleAppointment  
+  - Validate that user is allowed and rules permit change  
+  - Update appointment time and status  
+  - Log to audit_logs  
+
+- cancelAppointment  
+  - Similar to reschedule with proper state transition  
+
+Shop and order backend
+
+- listProducts  
+- getProductBySlug  
+- createOrUpdateCart if you choose to persist carts  
+- createOrderFromCart  
+  - Calculate totals and VAT  
+  - Create order and order_items  
+  - Prepare Stripe session  
+
+Stripe integration
+
+- Edge Function "stripe-webhook"  
+  - Handle checkout.session.completed and other relevant events  
+  - Verify signature  
+  - Mark orders as paid  
+  - Trigger notifications  
+
+Customer portal backend
+
+- getCustomerDashboardData  
+- listCustomerAppointments  
+- getCustomerAppointmentById  
+- listCustomerOrders  
+- getCustomerOrderById  
+- updateCustomerProfile  
+- updateCustomerPreferences  
+- getLoyaltyStatus and listLoyaltyTransactions  
+- listCustomerVouchers  
+
+Admin backend
+
+- listAppointments with filters  
+- updateAppointmentStatus with reason  
+- listCustomers and export subset to CSV  
+- listStaff and update working hours  
+- listServices and update details  
+- listProducts and stock movements  
+- listOrders with filters and export  
+- listNotificationTemplates, update template, send test notification  
+- adminSettings endpoints for opening hours, VAT, theme and legal texts  
+
+Notifications backend
+
+- sendNotification action that  
+  - looks up template  
+  - resolves variables  
+  - calls email provider  
+  - writes notification_logs  
+
+- optional queue layer via table that background job reads  
+
+Loyalty and vouchers backend
+
+- awardLoyaltyPoints for events like completed appointment  
+- redeemLoyaltyReward with checks and audit  
+- validateVoucherForOrder to compute discount  
+
+Audit and logging backend
+
+- Helper to write audit_logs on sensitive changes  
+- Apply it around  
+  - role changes  
+  - manual appointment overrides  
+  - refunds or order cancellations  
+
+====================================================
+19. EXAMPLE RESPONSE TEMPLATE
 ====================================================
 
 A Goal  
