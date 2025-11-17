@@ -17,13 +17,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Schnittwerk | Booking & Konto für St. Gallen",
-  description: "Phase 4: Buchung mit Account, Kundenportal und Slot-Handling.",
+  title: "Schnittwerk | Admin, Booking & Konto für St. Gallen",
+  description: "Phase 7: Analytics, Hardening und Tests für Admin, Booking, Shop und Portal.",
   metadataBase: new URL("https://schnittwerk.example"),
   keywords: ["Friseur St. Gallen", "Hair", "Balayage", "Salon", "Buchung"],
   openGraph: {
-    title: "Schnittwerk | Buchung & Portal",
-    description: "Salon-OS mit Services, Kundenkonto und Buchungsengine. Schweizer Datenschutz inklusive.",
+    title: "Schnittwerk | Admin, Buchung & Portal",
+    description: "Salon-OS mit Admin-RBAC, Services, Kundenkonto und Buchungsengine. Schweizer Datenschutz inklusive.",
     locale: "de_CH",
     type: "website",
     url: "https://schnittwerk.example",

@@ -33,9 +33,13 @@ npm run dev
 ## Linting & Qualität
 ```bash
 npm run lint
+npm run typecheck
+npm test
+# optional mit Supabase: SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... npm run test:db
 ```
-- Nutzt `next lint` mit `eslint.config.mjs`.
-- TypeScript ist strikt, kein Emittieren von JS.
+- Lint nutzt `next lint` mit `eslint.config.mjs`.
+- TypeScript strikt mit `tsc --noEmit`.
+- Vitest deckt Domäne (Booking/Voucher/Loyalty/Notifications) ab; `test:db` prüft RLS, falls Supabase-Keys gesetzt sind.
 
 ## shadcn/ui & Radix Nutzung
 - Konfiguration liegt in `components.json` mit Aliassen (`@/components`, `@/lib/utils`, `@/components/ui`).
@@ -50,8 +54,8 @@ npm run lint
 
 ## Environment Variablen
 - `.env.local` ist per `.gitignore` ausgeschlossen.
-- Für Phase 5: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (nur serverseitig), optional `NEXT_PUBLIC_SALON_ID`,
-  `NEXT_PUBLIC_STAFF_ID`, `NEXT_PUBLIC_APP_URL`, `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`.
+- Für Phase 5/6: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (nur serverseitig), optional `NEXT_PUBLIC_SALON_ID`,
+  `NEXT_PUBLIC_STAFF_ID`, `NEXT_PUBLIC_APP_URL`, `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `ADMIN_EMAIL` (Gate für Admin-Portal).
 - Ohne diese Variablen läuft der Demo-In-Memory-Store weiter (Termine/Bestellungen bis Prozessende).
 
 ## Troubleshooting

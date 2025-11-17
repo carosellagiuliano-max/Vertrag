@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint . --ext .ts,.tsx --max-warnings=0"
+    "lint": "eslint . --ext .ts,.tsx --max-warnings=0",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:db": "vitest run tests/integration --runInBand"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
@@ -16,10 +19,10 @@
     "@supabase/supabase-js": "^2.81.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
-    "stripe": "^17.6.0",
     "next": "16.0.3",
     "react": "19.2.0",
     "react-dom": "19.2.0",
+    "stripe": "^17.6.0",
     "tailwind-merge": "^2.6.0",
     "zod": "^4.1.12"
   },
@@ -31,6 +34,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.0.3",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.0.10"
   }
 }

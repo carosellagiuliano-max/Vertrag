@@ -7,6 +7,7 @@ const navItems = [
   { label: "Öffnungszeiten", href: "/contact#anreise" },
   { label: "Booking", href: "/booking" },
   { label: "Shop", href: "/shop" },
+  { label: "Admin", href: "/admin" },
   { label: "Designsystem", href: "/#designsystem" },
 ];
 
@@ -36,8 +37,8 @@ export function SiteShell({ children }: { children: ReactNode }) {
             ))}
           </nav>
           <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-wide text-accent-strong">
-            <span className="rounded-full bg-accent/10 px-3 py-1 text-ink">Phase 5</span>
-            <span className="hidden text-muted sm:inline">Shop & Checkout</span>
+            <span className="rounded-full bg-accent/10 px-3 py-1 text-ink">Phase 7</span>
+            <span className="hidden text-muted sm:inline">Analytics, Hardening & Tests</span>
           </div>
         </div>
       </header>
