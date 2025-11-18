@@ -68,7 +68,7 @@ export async function getCartDetails(): Promise<{ lines: CartDetail[]; total: nu
 }
 
 export async function listProducts(): Promise<Product[]> {
-  if (!hasSupabaseConfig) {
+  if (process.env.USE_DEMO === 'true') {
     return listDemoProducts();
   }
 
@@ -97,7 +97,7 @@ export async function listProducts(): Promise<Product[]> {
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | undefined> {
-  if (!hasSupabaseConfig) {
+  if (process.env.USE_DEMO === 'true') {
     return getDemoProductBySlug(slug);
   }
 
@@ -173,7 +173,7 @@ export async function placeOrder(params: {
 }): Promise<{ ok: boolean; message: string; redirectUrl?: string; orderId?: string }> {
   if (!params.lines.length) return { ok: false, message: "Warenkorb leer" };
 
-  if (!hasSupabaseConfig) {
+  if (process.env.USE_DEMO === 'true') {
     reserveDemoStock(params.lines);
     const order = createDemoOrder(params.email, params.lines);
     clearCart();
@@ -282,7 +282,7 @@ export async function placeOrder(params: {
 
 export async function loadOrders(email?: string) {
   if (!email) return [];
-  if (!hasSupabaseConfig) return listDemoOrders(email);
+  if (process.env.USE_DEMO === 'true') return listDemoOrders(email);
 
   const client = getServiceRoleClient();
   if (!client) return listDemoOrders(email);

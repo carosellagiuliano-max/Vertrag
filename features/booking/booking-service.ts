@@ -3,6 +3,7 @@ import { addMinutes, formatISO, parseISO } from "date-fns";
 import { cookies } from "next/headers";
 import { env, hasSupabaseConfig } from "@/lib/config/env";
 import { getServiceRoleClient } from "@/lib/supabase/admin";
+import { validateBookingRules, type BookingRuleContext } from "@/lib/domain/booking-rules";
 import { cancelDemoBooking, getDemoSalonContext, listDemoBookings, persistDemoBooking } from "./demo-store";
 
 export type BookingInput = {
@@ -27,9 +28,23 @@ export type BookingResult = {
 };
 
 export async function createBooking(input: BookingInput): Promise<BookingResult> {
-  const endAt = addMinutes(parseISO(input.startAt), input.durationMinutes);
+  const startAt = parseISO(input.startAt);
+  const endAt = addMinutes(startAt, input.durationMinutes);
+  const slot = { start: startAt, end: endAt };
 
-  if (!hasSupabaseConfig) {
+  if (process.env.USE_DEMO === 'true') {
+    // Demo mode: simple rule check without DB queries
+    const demoContext: BookingRuleContext = {
+      minLeadTimeMinutes: 60,
+      maxAdvanceDays: 90,
+      openingHours: { startHour: 9, endHour: 19 },
+      existingSlots: [],
+    };
+    const validation = validateBookingRules(slot, demoContext);
+    if (!validation.ok) {
+      throw new Error(validation.reasons.join("; "));
+    }
+
     const booking = persistDemoBooking({
       email: input.email,
       firstName: input.firstName,
@@ -37,7 +52,7 @@ export async function createBooking(input: BookingInput): Promise<BookingResult>
       phone: input.phone,
       serviceId: input.serviceId,
       serviceName: input.serviceName,
-      startAt: formatISO(parseISO(input.startAt)),
+      startAt: formatISO(startAt),
       endAt: formatISO(endAt),
       note: input.note,
     });
@@ -54,6 +69,29 @@ export async function createBooking(input: BookingInput): Promise<BookingResult>
   const client = getServiceRoleClient();
   if (!client) {
     throw new Error("Supabase-Konfiguration fehlt");
+  }
+
+  // Fetch booking rules context
+  const salonId = env.defaultSalonId;
+  const [{ data: openingHours }, { data: staff }, { data: existingAppointments }] = await Promise.all([
+    client.from("salons").select("opening_hours").eq("id", salonId).maybeSingle(),
+    client.from("staff").select("id, absences").eq("id", env.defaultStaffId).eq("active", true).maybeSingle(),
+    client.from("appointments").select("start_at, end_at").eq("salon_id", salonId).eq("status", "scheduled"),
+  ]);
+
+  const ruleContext: BookingRuleContext = {
+    minLeadTimeMinutes: 60,
+    maxAdvanceDays: 90,
+    openingHours: openingHours?.opening_hours?.[0] ?? { startHour: 9, endHour: 19 },
+    existingSlots: existingAppointments?.map((a: any) => ({
+      start: parseISO(a.start_at),
+      end: parseISO(a.end_at),
+    })) ?? [],
+  };
+
+  const validation = validateBookingRules(slot, ruleContext);
+  if (!validation.ok) {
+    throw new Error(`Buchung nicht möglich: ${validation.reasons.join(", ")}`);
   }
 
   const { data: existingUsers } = await client.auth.admin.listUsers({ email: input.email, perPage: 1 });
@@ -115,14 +153,13 @@ export async function createBooking(input: BookingInput): Promise<BookingResult>
     throw new Error("Kunde konnte nicht angelegt werden");
   }
 
-  const end = formatISO(endAt);
   const payload = {
     salon_id: env.defaultSalonId,
     customer_id: customerId,
     staff_id: env.defaultStaffId,
     service_id: input.serviceId,
-    start_at: formatISO(parseISO(input.startAt)),
-    end_at: end,
+    start_at: formatISO(startAt),
+    end_at: formatISO(endAt),
     status: "scheduled",
     notes: input.note,
   };
@@ -143,7 +180,7 @@ export async function createBooking(input: BookingInput): Promise<BookingResult>
 }
 
 export async function loadUpcomingAppointments(email?: string) {
-  if (!hasSupabaseConfig || !email) {
+  if (process.env.USE_DEMO === 'true' || !email) {
     return listDemoBookings(email);
   }
 
@@ -182,7 +219,7 @@ export async function loadUpcomingAppointments(email?: string) {
 }
 
 export async function cancelBooking(appointmentId: string, reason?: string) {
-  if (!hasSupabaseConfig) {
+  if (process.env.USE_DEMO === 'true') {
     return cancelDemoBooking(appointmentId, reason);
   }
   const client = getServiceRoleClient();
@@ -198,6 +235,6 @@ export async function cancelBooking(appointmentId: string, reason?: string) {
 }
 
 export function getDefaultBookingContext() {
-  if (!hasSupabaseConfig) return getDemoSalonContext();
+  if (process.env.USE_DEMO === 'true') return getDemoSalonContext();
   return { salonId: env.defaultSalonId, staffId: env.defaultStaffId };
 }

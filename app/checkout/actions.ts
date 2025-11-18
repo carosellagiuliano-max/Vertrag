@@ -3,6 +3,8 @@
 
 import { z } from "zod";
 import { getCart, placeOrder } from "@/features/shop/shop-service";
+import Stripe from "stripe";
+import { env, hasStripeConfig } from "@/lib/config/env";
 
 export type CheckoutState = { ok: boolean; message?: string; redirectUrl?: string; orderId?: string };
 
@@ -27,5 +29,11 @@ export async function checkoutAction(_: CheckoutState | undefined, formData: For
   }
 
   const result = await placeOrder({ email: parsed.data.email, name: parsed.data.name, lines: cart });
+  
+  // If Stripe session created, redirect immediately
+  if (result.redirectUrl) {
+    return result;
+  }
+
   return result;
 }

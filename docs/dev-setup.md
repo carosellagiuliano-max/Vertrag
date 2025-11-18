@@ -53,8 +53,9 @@ npm test
 - Supabase Artefakte in `supabase/migrations` und `supabase/seed` ablegen.
 
 ## Environment Variablen
+- `USE_DEMO='true'` (default: `false`): Aktiviert Demo-Mode in Services (admin, booking, shop). In Prod immer `false`.
 - `.env.local` ist per `.gitignore` ausgeschlossen.
-- Für Phase 5/6: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (nur serverseitig), optional `NEXT_PUBLIC_SALON_ID`,
+- Für Phase 5/6/7: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (nur serverseitig), optional `NEXT_PUBLIC_SALON_ID`,
   `NEXT_PUBLIC_STAFF_ID`, `NEXT_PUBLIC_APP_URL`, `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `ADMIN_EMAIL` (Gate für Admin-Portal).
 - Ohne diese Variablen läuft der Demo-In-Memory-Store weiter (Termine/Bestellungen bis Prozessende).
 

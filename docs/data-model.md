@@ -1,4 +1,4 @@
-# Datenmodell Phase 1 → Phase 4 Nutzung
+# Datenmodell Phase 1 → Phase 6 Nutzung
 
 Kernobjekte (Salon, Profile, Mitarbeitende, Kunden, Leistungen, Termine) bleiben unverändert. Phase 4 nutzt sie für den Buchungs-Flow: Service-Role-Server-Action legt Profile/Kunden an, speichert Termine und liest sie fürs Portal. Ohne Supabase laufen dieselben Strukturen in einem Demo-In-Memory-Store.
 
@@ -111,10 +111,22 @@ Kernobjekte (Salon, Profile, Mitarbeitende, Kunden, Leistungen, Termine) bleiben
 - **created_at**, **updated_at** `timestamptz`
 
 ## Indizes
-- Salon- und Join-Indizes auf `salon_id`, `profile_id`, `customer_id`, `staff_id` sowie `start_at` für Terminabfragen.
+- Phase 1-5: Salon- und Join-Indizes auf `salon_id`, `profile_id`, `customer_id`, `staff_id` sowie `start_at` für Terminabfragen.
+- Phase 6:
+  - [`idx_notification_templates_type_language`](supabase/migrations/20251118000000_phase6_notifications_loyalty_vouchers.sql:19) `(type, language)`
+  - [`idx_audit_logs_table_record`](supabase/migrations/20251118000000_phase6_notifications_loyalty_vouchers.sql:LINES) `(table_name, record_id)`
+  - [`idx_audit_logs_salon_created`](supabase/migrations/20251118000000_phase6_notifications_loyalty_vouchers.sql:LINES) `(salon_id, created_at DESC) WHERE salon_id IS NOT NULL`
+  - [`idx_audit_logs_user`](supabase/migrations/20251118000000_phase6_notifications_loyalty_vouchers.sql:LINES) `(user_id) WHERE user_id IS NOT NULL`
+  - [`idx_vouchers_salon`](supabase/migrations/20251118000000_phase6_notifications_loyalty_vouchers.sql:86) `(salon_id)`
+  - [`idx_vouchers_code`](supabase/migrations/20251118000000_phase6_notifications_loyalty_vouchers.sql:87) `(code)`
+  - [`idx_loyalty_tiers_salon`](supabase/migrations/20251118000000_phase6_notifications_loyalty_vouchers.sql:88) `(salon_id)`
+  - [`idx_loyalty_accounts_customer`](supabase/migrations/20251118000000_phase6_notifications_loyalty_vouchers.sql:89) `(customer_id)`
+  - [`idx_loyalty_accounts_salon`](supabase/migrations/20251118000000_phase6_notifications_loyalty_vouchers.sql:90) `(salon_id)`
+  - [`idx_loyalty_transactions_account`](supabase/migrations/20251118000000_phase6_notifications_loyalty_vouchers.sql:91) `(account_id)`
 
 ## Zeitstempel-Trigger
-Alle Tabellen nutzen `public.set_updated_at()` vor Updates, um `updated_at` konsistent zu pflegen.
+- Phase 1-5: Alle Tabellen mit `updated_at` nutzen `public.set_updated_at()`.
+- Phase 6: Zusätzlich [`set_timestamp_notification_templates`](supabase/migrations/20251118000000_phase6_notifications_loyalty_vouchers.sql:94), [`set_timestamp_vouchers`](supabase/migrations/20251118000000_phase6_notifications_loyalty_vouchers.sql:98), [`set_timestamp_loyalty_tiers`](supabase/migrations/20251118000000_phase6_notifications_loyalty_vouchers.sql:102), [`set_timestamp_loyalty_accounts`](supabase/migrations/20251118000000_phase6_notifications_loyalty_vouchers.sql:106) vor Updates.
 
 ## Seed-Daten
 - Admin-User `admin@schnittwerk.test` mit Profil, Staff-Eintrag (Owner) und Customer-Datensatz.
@@ -122,3 +134,69 @@ Alle Tabellen nutzen `public.set_updated_at()` vor Updates, um `updated_at` kons
 - Kategorie "Hair" plus Services "Haarschnitt & Föhnen" und "Glossing".
 - Beispieltermin zwei Tage in der Zukunft.
 - Shop-Produkte "Intense Care Mask" und "Glow Finishing Oil" inkl. Lagerbestand.
+
+### notification_templates
+- **id** `uuid` PK, `gen_random_uuid()`
+- **salon_id** `uuid` FK -> `salons.id`
+- **type** `text` (required)
+- **channel** `text` (required)
+- **language** `text` (required)
+- **subject** `text`
+- **body_html** `text`
+- **body_text** `text`
+- **active** `boolean` default `true`
+- **created_at**, **updated_at** `timestamptz`
+- Unique: `(salon_id, type, channel, language)`
+
+### audit_logs (strict unified schema)
+- **id** `uuid` PK, `gen_random_uuid()`
+- **table_name** `text` NOT NULL
+- **record_id** `uuid` NOT NULL
+- **action** `text` NOT NULL CHECK (`action` IN ('INSERT', 'UPDATE', 'DELETE'))
+- **old_data** `jsonb`
+- **new_data** `jsonb`
+- **user_id** `uuid` REFERENCES `auth.users(id)`
+- **salon_id** `uuid`
+- **created_at** `timestamptz` DEFAULT `now()` NOT NULL
+
+### vouchers
+- **id** `uuid` PK, `gen_random_uuid()`
+- **salon_id** `uuid` FK -> `salons.id`
+- **code** `text` unique
+- **type** `text` check in (`fixed`, `percent`)
+- **value** `numeric(10,2)` > 0
+- **max_uses** `integer` > 0
+- **used_count** `integer` default 0 >= 0
+- **expires_at** `timestamptz`
+- **active** `boolean` default `true`
+- **created_at**, **updated_at** `timestamptz`
+
+### loyalty_tiers
+- **id** `uuid` PK, `gen_random_uuid()`
+- **salon_id** `uuid` FK -> `salons.id`
+- **name** `text` (required)
+- **threshold_points** `integer` default 0 >= 0
+- **benefits** `jsonb` default `{}`
+- **created_at**, **updated_at** `timestamptz`
+
+### loyalty_accounts
+- **id** `uuid` PK, `gen_random_uuid()`
+- **customer_id** `uuid` FK -> `customers.id`
+- **salon_id** `uuid` FK -> `salons.id`
+- **points** `integer` default 0 >= 0
+- **tier_id** `uuid` FK -> `loyalty_tiers.id`
+- **created_at**, **updated_at** `timestamptz`
+- Unique: `(customer_id, salon_id)`
+
+### loyalty_transactions
+- **id** `uuid` PK, `gen_random_uuid()`
+- **account_id** `uuid` FK -> `loyalty_accounts.id`
+- **points_delta** `integer`
+- **reason** `text` (required)
+- **created_at** `timestamptz`
+
+## Audit Triggers
+- Generic `public.handle_audit()` function logs INSERT/UPDATE/DELETE to `audit_logs`.
+- **Phase6 tables**: `notification_templates`, `vouchers`, `loyalty_tiers`, `loyalty_accounts`, `loyalty_transactions`.
+- **Phase7c core tables**: `appointments`, `orders`, `customers`, `services`, `products`.
+- Triggers: AFTER INSERT OR UPDATE OR DELETE, idempotent creation via `IF NOT EXISTS`.

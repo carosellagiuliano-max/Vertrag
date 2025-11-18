@@ -153,3 +153,73 @@ values
   ('88888888-8888-8888-8888-888888888888', '11111111-1111-1111-1111-111111111111', 12, 0),
   ('99999999-9999-9999-9999-999999999999', '11111111-1111-1111-1111-111111111111', 18, 0)
 on conflict (product_id) do nothing;
+
+-- Phase 6a: Seed notification templates, loyalty tiers, sample voucher for default salon
+
+-- Notification templates (de/en for appointment_confirmation, order_confirmation)
+insert into public.notification_templates (salon_id, type, channel, language, subject, body_html, body_text, active)
+values
+  ('11111111-1111-1111-1111-111111111111', 'appointment_confirmation', 'email', 'de',
+   'Terminbestätigung bei Schnittwerk',
+   '&lt;!DOCTYPE html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset="utf-8"&gt;&lt;/head&gt;&lt;body&gt;
+    &lt;h1&gt;Vielen Dank für Ihre Buchung!&lt;/h1&gt;
+    &lt;p&gt;Sehr geehrte/r {{customer_name}},&lt;/p&gt;
+    &lt;p&gt;Ihr Termin:&lt;/p&gt;
+    &lt;ul&gt;
+      &lt;li&gt;Service: {{service_name}}&lt;/li&gt;
+      &lt;li&gt;Datum/Uhrzeit: {{start_at}}&lt;/li&gt;
+      &lt;li&gt;Stylist: {{staff_name}}&lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;p&gt;Bis bald!&lt;br&gt;Schnittwerk Team&lt;/p&gt;
+   &lt;/body&gt;&lt;/html&gt;',
+   'Terminbestätigung: {{service_name}} am {{start_at}} mit {{staff_name}}. Vielen Dank!',
+   true),
+  ('11111111-1111-1111-1111-111111111111', 'appointment_confirmation', 'email', 'en',
+   'Appointment Confirmation at Schnittwerk',
+   '&lt;!DOCTYPE html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset="utf-8"&gt;&lt;/head&gt;&lt;body&gt;
+    &lt;h1&gt;Thank you for booking!&lt;/h1&gt;
+    &lt;p&gt;Dear {{customer_name}},&lt;/p&gt;
+    &lt;p&gt;Your appointment:&lt;/p&gt;
+    &lt;ul&gt;
+      &lt;li&gt;Service: {{service_name}}&lt;/li&gt;
+      &lt;li&gt;Date/Time: {{start_at}}&lt;/li&gt;
+      &lt;li&gt;Stylist: {{staff_name}}&lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;p&gt;See you soon!&lt;br&gt;Schnittwerk Team&lt;/p&gt;
+   &lt;/body&gt;&lt;/html&gt;',
+   'Appointment confirmation: {{service_name}} on {{start_at}} with {{staff_name}}. Thank you!',
+   true),
+  ('11111111-1111-1111-1111-111111111111', 'order_confirmation', 'email', 'de',
+   'Bestellbestätigung bei Schnittwerk',
+   '&lt;!DOCTYPE html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset="utf-8"&gt;&lt;/head&gt;&lt;body&gt;
+    &lt;h1&gt;Ihre Bestellung #{{order_id}}&lt;/h1&gt;
+    &lt;p&gt;Vielen Dank, {{customer_name}}!&lt;/p&gt;
+    &lt;p&gt;Gesamt: {{total_chf}} CHF&lt;/p&gt;
+    &lt;p&gt;Abholung im Salon.&lt;/p&gt;
+   &lt;/body&gt;&lt;/html&gt;',
+   'Bestellung #{{order_id}} bestätigt. Gesamt: {{total_chf}} CHF. Danke!',
+   true),
+  ('11111111-1111-1111-1111-111111111111', 'order_confirmation', 'email', 'en',
+   'Order Confirmation from Schnittwerk',
+   '&lt;!DOCTYPE html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset="utf-8"&gt;&lt;/head&gt;&lt;body&gt;
+    &lt;h1&gt;Your Order #{{order_id}}&lt;/h1&gt;
+    &lt;p&gt;Thank you, {{customer_name}}!&lt;/p&gt;
+    &lt;p&gt;Total: {{total_chf}} CHF&lt;/p&gt;
+    &lt;p&gt;Pickup at salon.&lt;/p&gt;
+   &lt;/body&gt;&lt;/html&gt;',
+   'Order #{{order_id}} confirmed. Total: {{total_chf}} CHF. Thanks!',
+   true)
+on conflict (salon_id, type, channel, language) do nothing;
+
+-- Loyalty tiers
+insert into public.loyalty_tiers (salon_id, name, threshold_points, benefits)
+values
+  ('11111111-1111-1111-1111-111111111111', 'Bronze', 0, '{"discount_products": "5%"}'::jsonb),
+  ('11111111-1111-1111-1111-111111111111', 'Silber', 100, '{"discount_services": "10%", "free_glossing_every_5": true}'::jsonb),
+  ('11111111-1111-1111-1111-111111111111', 'Gold', 500, '{"discount_all": "15%", "priority_booking": true, "vip_gifts": true}'::jsonb)
+on conflict (id) do nothing;
+
+-- Sample voucher
+insert into public.vouchers (salon_id, code, type, value, max_uses, expires_at, active)
+values ('11111111-1111-1111-1111-111111111111', 'WELCOME10', 'percent', 10.00, null, now() + interval '6 months', true)
+on conflict (code) do nothing;

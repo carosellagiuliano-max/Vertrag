@@ -7,8 +7,9 @@ import { demoAdminData } from "./demo-data";
 export type AdminDashboard = {
   analytics: {
     period: string;
-    bookings: number;
+    appointments: number;
     revenueChf: number;
+    customers: number;
     occupancyRate: number;
     retentionRate: number;
   };
@@ -63,7 +64,7 @@ export function isAdminEmail(email?: string | null) {
 }
 
 export async function loadAdminDashboard(): Promise<AdminDashboard> {
-  if (!hasSupabaseConfig) return demoAdminData;
+  if (process.env.USE_DEMO === 'true') return demoAdminData;
 
   const client = getServiceRoleClient();
   if (!client) return demoAdminData;
@@ -200,11 +201,13 @@ export async function loadAdminDashboard(): Promise<AdminDashboard> {
     });
     const repeaters = Array.from(uniqueCustomers.values()).filter((count) => count > 1).length;
     const retentionRate = uniqueCustomers.size ? repeaters / uniqueCustomers.size : 0;
+    const customers = uniqueCustomers.size;
 
     return {
       period: "letzte 30 Tage",
-      bookings: bookings.length,
+      appointments: bookings.length,
       revenueChf,
+      customers,
       occupancyRate,
       retentionRate,
     } satisfies AdminDashboard["analytics"];
@@ -220,4 +223,325 @@ export async function loadAdminDashboard(): Promise<AdminDashboard> {
     settings,
     notifications: demoAdminData.notifications,
   };
+
+export async function getServices() {
+  if (process.env.USE_DEMO === 'true') return demoAdminData.services;
+  const client = getServiceRoleClient();
+  if (!client) return demoAdminData.services;
+
+  const { data, error } = await client
+    .from("services")
+    .select("id, name, price_chf, duration_minutes, active, service_categories(name)")
+    .eq("salon_id", env.defaultSalonId)
+    .order("name", { ascending: true });
+
+  if (error || !data) return demoAdminData.services;
+
+  return data.map((row) => ({
+    id: row.id,
+    name: row.name,
+    category: (row.service_categories as { name?: string } | null)?.name,
+    priceChf: Number(row.price_chf ?? 0),
+    durationMinutes: row.duration_minutes ?? undefined,
+    active: Boolean(row.active),
+  }));
+}
+
+export async function getStaff() {
+  if (process.env.USE_DEMO === 'true') return demoAdminData.staff;
+  const client = getServiceRoleClient();
+  if (!client) return demoAdminData.staff;
+
+  const { data, error } = await client
+    .from("staff")
+    .select("id, display_name, role, title, active")
+    .eq("salon_id", env.defaultSalonId)
+    .order("display_name", { ascending: true });
+
+  if (error || !data) return demoAdminData.staff;
+
+  return data.map((row) => ({
+    id: row.id,
+    name: row.display_name,
+    role: row.role,
+    title: row.title,
+    active: Boolean(row.active),
+  }));
+}
+
+export async function getProducts() {
+  if (process.env.USE_DEMO === 'true') return demoAdminData.products;
+  const client = getServiceRoleClient();
+  if (!client) return demoAdminData.products;
+
+  const { data, error } = await client
+    .from("products")
+    .select("id, name, price_chf, active, product_stock(stock_on_hand)")
+    .eq("salon_id", env.defaultSalonId)
+    .order("name", { ascending: true });
+
+  if (error || !data) return demoAdminData.products;
+
+  return data.map((row) => ({
+    id: row.id,
+    name: row.name,
+    priceChf: Number(row.price_chf ?? 0),
+    stock: (row.product_stock as { stock_on_hand?: number } | null)?.stock_on_hand ?? undefined,
+    active: Boolean(row.active),
+  }));
+}
+
+export async function getNotificationTemplates() {
+  if (process.env.USE_DEMO === 'true') return demoAdminData.notifications;
+  const client = getServiceRoleClient();
+  if (!client) return demoAdminData.notifications;
+
+  const { data, error } = await client
+    .from("notification_templates")
+    .select("id, key: type, subject, status: active")
+    .eq("salon_id", env.defaultSalonId)
+    .order("type");
+
+  if (error || !data) return demoAdminData.notifications;
+
+  return data.map((row) => ({
+    id: row.id,
+    key: row.type,
+    subject: row.subject,
+    status: row.active ? "active" : "inactive",
+  }));
+}
+
+export async function createService(service: Omit<AdminDashboard["services"][number], "id">) {
+  const client = getServiceRoleClient();
+  if (!client) throw new Error("Supabase client unavailable");
+
+  const { data, error } = await client
+    .from("services")
+    .insert({
+      salon_id: env.defaultSalonId,
+      name: service.name,
+      price_chf: service.priceChf,
+      duration_minutes: service.durationMinutes,
+      active: service.active,
+    })
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function updateService(id: string, service: Partial<AdminDashboard["services"][number]>) {
+  const client = getServiceRoleClient();
+  if (!client) throw new Error("Supabase client unavailable");
+
+  const { data, error } = await client
+    .from("services")
+    .update({
+      name: service.name,
+      price_chf: service.priceChf,
+      duration_minutes: service.durationMinutes,
+      active: service.active,
+    })
+    .eq("id", id)
+    .eq("salon_id", env.defaultSalonId)
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function deleteService(id: string) {
+  const client = getServiceRoleClient();
+  if (!client) throw new Error("Supabase client unavailable");
+
+  const { error } = await client
+    .from("services")
+    .delete()
+    .eq("id", id)
+    .eq("salon_id", env.defaultSalonId);
+
+  if (error) throw new Error(error.message);
+}
+
+export async function createStaff(staff: Omit<AdminDashboard["staff"][number], "id">) {
+  const client = getServiceRoleClient();
+  if (!client) throw new Error("Supabase client unavailable");
+
+  const { data, error } = await client
+    .from("staff")
+    .insert({
+      salon_id: env.defaultSalonId,
+      display_name: staff.name,
+      role: staff.role,
+      title: staff.title,
+      active: staff.active,
+    })
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function updateStaff(id: string, staff: Partial<AdminDashboard["staff"][number]>) {
+  const client = getServiceRoleClient();
+  if (!client) throw new Error("Supabase client unavailable");
+
+  const { data, error } = await client
+    .from("staff")
+    .update({
+      display_name: staff.name,
+      role: staff.role,
+      title: staff.title,
+      active: staff.active,
+    })
+    .eq("id", id)
+    .eq("salon_id", env.defaultSalonId)
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function deleteStaff(id: string) {
+  const client = getServiceRoleClient();
+  if (!client) throw new Error("Supabase client unavailable");
+
+  const { error } = await client
+    .from("staff")
+    .delete()
+    .eq("id", id)
+    .eq("salon_id", env.defaultSalonId);
+
+  if (error) throw new Error(error.message);
+}
+
+export async function createProduct(product: Omit<AdminDashboard["products"][number], "id">) {
+  const client = getServiceRoleClient();
+  if (!client) throw new Error("Supabase client unavailable");
+
+  const { data: newProduct, error: insertError } = await client
+    .from("products")
+    .insert({
+      salon_id: env.defaultSalonId,
+      name: product.name,
+      price_chf: product.priceChf,
+      active: product.active,
+    })
+    .select()
+    .single();
+
+  if (insertError) throw new Error(insertError.message);
+
+  // Initialize stock
+  await client
+    .from("product_stock")
+    .insert({
+      product_id: newProduct.id,
+      salon_id: env.defaultSalonId,
+      stock_on_hand: product.stock ?? 0,
+    });
+
+  return newProduct;
+}
+
+export async function updateProduct(id: string, product: Partial<AdminDashboard["products"][number]>) {
+  const client = getServiceRoleClient();
+  if (!client) throw new Error("Supabase client unavailable");
+
+  const updates: any = {};
+  if (product.name !== undefined) updates.name = product.name;
+  if (product.priceChf !== undefined) updates.price_chf = product.priceChf;
+  if (product.active !== undefined) updates.active = product.active;
+
+  const { data, error } = await client
+    .from("products")
+    .update(updates)
+    .eq("id", id)
+    .eq("salon_id", env.defaultSalonId)
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+
+  if (product.stock !== undefined) {
+    await client
+      .from("product_stock")
+      .update({ stock_on_hand: product.stock })
+      .eq("product_id", id);
+  }
+
+  return data;
+}
+
+export async function deleteProduct(id: string) {
+  const client = getServiceRoleClient();
+  if (!client) throw new Error("Supabase client unavailable");
+
+  await client.from("product_stock").delete().eq("product_id", id);
+  const { error } = await client
+    .from("products")
+    .delete()
+    .eq("id", id)
+    .eq("salon_id", env.defaultSalonId);
+
+  if (error) throw new Error(error.message);
+}
+
+export async function createNotificationTemplate(template: { type: string; subject: string; active: boolean }) {
+  const client = getServiceRoleClient();
+  if (!client) throw new Error("Supabase client unavailable");
+
+  const { data, error } = await client
+    .from("notification_templates")
+    .insert({
+      salon_id: env.defaultSalonId,
+      type: template.type,
+      channel: 'email',
+      language: 'de',
+      subject: template.subject,
+      active: template.active,
+    })
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function updateNotificationTemplate(id: string, template: Partial<{ type: string; subject: string; active: boolean }>) {
+  const client = getServiceRoleClient();
+  if (!client) throw new Error("Supabase client unavailable");
+
+  const { data, error } = await client
+    .from("notification_templates")
+    .update({
+      subject: template.subject,
+      active: template.active,
+    })
+    .eq("id", id)
+    .eq("salon_id", env.defaultSalonId)
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function deleteNotificationTemplate(id: string) {
+  const client = getServiceRoleClient();
+  if (!client) throw new Error("Supabase client unavailable");
+
+  const { error } = await client
+    .from("notification_templates")
+    .delete()
+    .eq("id", id)
+    .eq("salon_id", env.defaultSalonId);
+
+  if (error) throw new Error(error.message);
+}
 }

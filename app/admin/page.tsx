@@ -1,4 +1,4 @@
-// @ts-nocheck
+"use client";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import Link from "next/link";
@@ -73,18 +73,15 @@ export default async function AdminPage() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-4">
-            <KeyValue label="Buchungen" value={dashboard.analytics.bookings} />
+            <KeyValue label="Termine" value={dashboard.analytics.appointments} />
             <KeyValue
               label="Umsatz"
               value={`CHF ${dashboard.analytics.revenueChf.toFixed(2)}`}
             />
+            <KeyValue label="Kunden" value={dashboard.analytics.customers} />
             <KeyValue
               label="Auslastung"
               value={`${Math.round(dashboard.analytics.occupancyRate * 100)}%`}
-            />
-            <KeyValue
-              label="Retention"
-              value={`${Math.round(dashboard.analytics.retentionRate * 100)}%`}
             />
           </div>
         </CardContent>
