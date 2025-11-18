@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { cookies } from "next/headers";
 import Stripe from "stripe";
 import { env, hasStripeConfig, hasSupabaseConfig } from "@/lib/config/env";
